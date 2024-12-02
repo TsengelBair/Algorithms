@@ -2,14 +2,18 @@
 #include <vector>
 #include <queue>
 
-const int INF = 10000;
+const int INF = 10000; // для инициализации
 
-void djkstra(std::vector<std::vector<int>>& graph, int start) {
+std::vector<int> djkstra(std::vector<std::vector<int>>& graph, int start, int end) {
 
     int n = graph.size();
 
     // массив для отслеживания текущих расстояний, по дефолту заполнен INF, т.к. расстояния еще неизвестны
     std::vector<int>dist(n, INF);
+
+    // массив для отселживания из какой вершины пришли 
+    // к примеру если под индексом 1 хранится значение 0, значит в вершину 1 пришли из вершины 0
+    std::vector<int>from(n, -1);
 
     // очередь с приоритетом в порядке возрастания, для того чтобы всегда извлекать минимальную вершину
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<>>q;
@@ -35,15 +39,22 @@ void djkstra(std::vector<std::vector<int>>& graph, int start) {
             if (graph[minVertex][v] != INF && dist[v] > currentDist + graph[minVertex][v]) {
                 // если найденный вес меньше -> обновляем значение, т.к. нашли более короткий путь
                 dist[v] = currentDist + graph[minVertex][v];
+                from[v] = minVertex; // вершина из которой пришли
                 // добавляем вершину в очередь
                 q.push(std::make_pair(dist[v], v));
             }
         }
     }
 
-    for (int i = 0; i < dist.size(); ++i) {
-        std::cout << dist[i] << " ";
+    std::vector<int>path;
+    /* начинаем цикл с конечного элемента и последовательно добавляем в path родительские вершины */
+    for (int v = end; v != -1; v = from[v]) {
+        path.push_back(v);
     }
+
+    /* разворачиваем, т.к. вершины добавляли с конца */
+    std::reverse(path.begin(), path.end());
+    return path;
 };
 
 int main()
@@ -59,5 +70,10 @@ int main()
         {14, INF, 2, INF, 9, 0}
     };
 
-    djkstra(graph, 0);
+    std::vector<int>res = djkstra(graph, 0, 5);
+    for (int i = 0; i < res.size(); ++i) {
+        std::cout << res[i] << " ";
+    }
+
+    return 0;
 }
